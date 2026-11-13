@@ -78,6 +78,11 @@ final class LocalNetworkAuthorization: NSObject, NetServiceDelegate {
 @objc class AppDelegate: FlutterAppDelegate {
 
     private let localNetwork = LocalNetworkAuthorization()
+<<<<<<< HEAD
+=======
+    private var pokeConnections: [NWConnection] = []
+    private var didPoke = false
+>>>>>>> 88e53c1 (final1)
 
     override func application(
         _ application: UIApplication,
@@ -86,6 +91,19 @@ final class LocalNetworkAuthorization: NSObject, NetServiceDelegate {
 
         GeneratedPluginRegistrant.register(with: self)
         registerLocalNetworkChannel()
+<<<<<<< HEAD
+=======
+
+        // Khi app hiện lên màn hình, chủ động chạm vào mạng LAN một lần để iOS hiện hộp
+        // thoại xin quyền và thêm mục "Mạng cục bộ" vào Cài đặt > Meo Beo.
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.pokeLocalNetwork()
+        }
+>>>>>>> 88e53c1 (final1)
 
         return super.application(
             application,
@@ -93,6 +111,44 @@ final class LocalNetworkAuthorization: NSObject, NetServiceDelegate {
         )
     }
 
+<<<<<<< HEAD
+=======
+    /// Thử kết nối tới vài địa chỉ mạng nội bộ (multicast mDNS, ESP32 192.168.4.2, router).
+    /// Mọi kết nối tới địa chỉ LAN đều khiến iOS hỏi quyền Mạng cục bộ. Kết quả bỏ qua.
+    private func pokeLocalNetwork() {
+        if didPoke { return }
+        didPoke = true
+
+        let targets: [(String, UInt16, Bool)] = [
+            ("224.0.0.251", 5353, true),
+            ("192.168.4.2", 80, false),
+            ("192.168.1.1", 80, false),
+        ]
+        for (host, port, isUDP) in targets {
+            guard let p = NWEndpoint.Port(rawValue: port) else { continue }
+            let conn = NWConnection(
+                host: NWEndpoint.Host(host),
+                port: p,
+                using: isUDP ? .udp : .tcp
+            )
+            conn.stateUpdateHandler = { state in
+                if isUDP, case .ready = state {
+                    conn.send(content: Data([0]), completion: .contentProcessed { _ in })
+                }
+            }
+            conn.start(queue: .main)
+            pokeConnections.append(conn)
+        }
+        // Đóng các kết nối thăm dò sau vài giây.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8) { [weak self] in
+            self?.pokeConnections.forEach { $0.cancel() }
+            self?.pokeConnections.removeAll()
+        }
+        // Đồng thời chạy luồng Bonjour để biết trạng thái cấp quyền.
+        localNetwork.request { _ in }
+    }
+
+>>>>>>> 88e53c1 (final1)
     /// MethodChannel "meo_beo/local_network":
     ///  - request      -> Bool (true nếu đã được cấp quyền Mạng nội bộ)
     ///  - openSettings -> mở màn hình Cài đặt của ứng dụng

@@ -31,9 +31,19 @@ Mở `ios/Runner.xcworkspace` bằng Xcode để cấu hình Signing & Capabilit
 - Flutter Web dùng WebSocket, mặc định `9001`.
 - Điền đúng IP máy chủ MQTT cùng mạng Wi-Fi với thiết bị.
 
+<<<<<<< HEAD
 ## Quyền Mạng nội bộ (iOS)
 iOS 14+ yêu cầu người dùng cấp quyền **Mạng nội bộ** trước khi app kết nối tới máy chủ MQTT (192.168.x.x) và camera ESP32 (192.168.4.2).
 - `Info.plist` đã khai báo `NSLocalNetworkUsageDescription` và `NSBonjourServices`.
 - `ios/Runner/AppDelegate.swift` kích hoạt hộp thoại xin quyền qua MethodChannel `meo_beo/local_network`.
 - `lib/local_network_permission.dart` xin quyền khi mở app, trước khi kết nối MQTT và trước khi mở camera; nếu bị từ chối sẽ hiện hộp thoại có nút **Mở Cài đặt**.
 - Nếu trước đó đã bấm "Không cho phép": Cài đặt > Meo Beo > bật **Mạng nội bộ**. Nếu hộp thoại không hiện, gỡ app rồi cài lại.
+=======
+## Quyền Mạng cục bộ (iOS)
+iOS 14+ yêu cầu người dùng cấp quyền **Mạng cục bộ** trước khi app kết nối tới máy chủ MQTT (192.168.x.x) và camera ESP32 (192.168.4.2).
+- `Info.plist` đã khai báo `NSLocalNetworkUsageDescription` và `NSBonjourServices`.
+- `ios/Runner/AppDelegate.swift` kích hoạt hộp thoại xin quyền qua MethodChannel `meo_beo/local_network`.
+- `lib/local_network_permission.dart` xin quyền khi mở app, trước khi kết nối MQTT và trước khi mở camera; nếu bị từ chối sẽ hiện hộp thoại có nút **Mở Cài đặt**.
+- Nếu trước đó đã bấm "Không cho phép": Cài đặt > Meo Beo > bật **Mạng cục bộ**. Nếu hộp thoại không hiện, gỡ app rồi cài lại.
+- Mục **Mạng cục bộ** chỉ xuất hiện trong Cài đặt > Meo Beo sau khi app đã thử truy cập mạng LAN lần đầu. App tự làm việc này khi mở (AppDelegate.swift). Nếu vẫn không thấy: gỡ hẳn app, khởi động lại iPhone, cài lại bản mới, mở app và bấm "Cho phép".
+>>>>>>> 88e53c1 (final1)

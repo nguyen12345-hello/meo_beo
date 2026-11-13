@@ -46,7 +46,11 @@ class _CameraPageState extends State<CameraPage> {
       _web = null;
     });
 
+<<<<<<< HEAD
     // iOS cần quyền "Mạng nội bộ" để mở được http://192.168.4.2/stream.
+=======
+    // iOS cần quyền "Mạng cục bộ" để mở được http://192.168.4.2/stream.
+>>>>>>> 88e53c1 (final1)
     var allowed = await LocalNetworkPermission.ensure();
     if (!mounted) return;
     if (!allowed) {
@@ -55,7 +59,11 @@ class _CameraPageState extends State<CameraPage> {
       if (!mounted) return;
       if (!allowed) {
         setState(() {
+<<<<<<< HEAD
           _error = 'Chưa có quyền Mạng nội bộ. Vào Cài đặt > Meo Beo để bật quyền này.';
+=======
+          _error = 'Chưa có quyền Mạng cục bộ. Vào Cài đặt > Meo Beo để bật quyền này.';
+>>>>>>> 88e53c1 (final1)
         });
         return;
       }

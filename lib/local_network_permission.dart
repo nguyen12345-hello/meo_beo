@@ -2,7 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+<<<<<<< HEAD
 /// Xin quyền "Mạng nội bộ" (Local Network) trên iOS.
+=======
+/// Xin quyền "Mạng cục bộ" (Local Network) trên iOS.
+>>>>>>> 88e53c1 (final1)
 ///
 /// iOS 14+ chặn mọi kết nối tới thiết bị trong mạng LAN (broker MQTT 192.168.x.x,
 /// camera ESP32 192.168.4.2...) cho tới khi người dùng bấm "Cho phép". Nếu không xin
@@ -51,11 +55,19 @@ class LocalNetworkPermission {
     final tryAnyway = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+<<<<<<< HEAD
         title: const Text('Cần quyền Mạng nội bộ'),
         content: const Text(
           'Meo Beo chưa được phép truy cập mạng nội bộ nên không kết nối được '
           'máy chủ MQTT và camera.\n\n'
           'Vào Cài đặt > Meo Beo > bật "Mạng nội bộ", rồi quay lại ứng dụng.',
+=======
+        title: const Text('Cần quyền Mạng cục bộ'),
+        content: const Text(
+          'Meo Beo chưa được phép truy cập mạng nội bộ nên không kết nối được '
+          'máy chủ MQTT và camera.\n\n'
+          'Vào Cài đặt > Meo Beo > bật "Mạng cục bộ", rồi quay lại ứng dụng.',
+>>>>>>> 88e53c1 (final1)
         ),
         actions: [
           TextButton(
