@@ -3,6 +3,8 @@ name: Build Flutter iOS IPA
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -14,12 +16,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Use the current stable Flutter SDK. The iOS project uses Flutter's
-      # generated Swift package integration, which is not supported by older
-      # pinned Flutter releases such as 3.24.0.
+      # Flutter 3.50 matches the SDK constraints in pubspec.lock and supports
+      # the iOS Swift package integration used by this project.
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.50.0'
           channel: stable
           cache: true
 
@@ -27,13 +29,12 @@ jobs:
         run: |
           flutter --version
           xcodebuild -version
-          pod --version
 
       - name: Validate iOS project files
         run: |
           plutil -lint ios/Runner.xcodeproj/project.pbxproj
           plutil -lint ios/Runner/Info.plist
-          if grep -nE '^(<<<<<<<|=======|>>>>>>>)' ios/Runner.xcodeproj/project.pbxproj ios/Runner/Info.plist; then
+          if grep -nE '^(<<<<<<<|=======|>>>>>>>)' ios/Runner.xcodeproj/project.pbxproj ios/Runner/Info.plist lib/local_network_permission.dart; then
             echo "Unresolved Git conflict markers found in iOS project files."
             exit 1
           fi
@@ -43,30 +44,15 @@ jobs:
           flutter clean
           flutter pub get
 
-      - name: Resolve CocoaPods dependencies
-        run: |
-          cd ios
-          pod install
-          cd ..
-
       - name: Inspect Xcode project
         run: xcodebuild -list -project ios/Runner.xcodeproj
 
-      - name: Build iOS App (unsigned)
-        run: flutter build ios --release --no-codesign
-
-      - name: Package unsigned IPA
-        run: |
-          test -d build/ios/iphoneos/Runner.app
-          rm -rf Payload flutter-app.ipa
-          mkdir -p Payload
-          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
-          /usr/bin/zip -qry flutter-app.ipa Payload
-          rm -rf Payload
+      - name: Build IPA
+        run: flutter build ipa --release --no-codesign
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: meo-beo-ios-release-unsigned
-          path: flutter-app.ipa
+          path: build/ios/ipa/*.ipa
           if-no-files-found: error
