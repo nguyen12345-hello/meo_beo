@@ -47,12 +47,23 @@ jobs:
       - name: Inspect Xcode project
         run: xcodebuild -list -project ios/Runner.xcodeproj
 
-      - name: Build IPA
+      - name: Build iOS archive
         run: flutter build ipa --release --no-codesign
+
+      - name: Package unsigned IPA
+        run: |
+          APP_PATH="build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app"
+          test -d "$APP_PATH"
+          rm -rf Payload meo-beo-ios-release-unsigned.ipa
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/Runner.app
+          /usr/bin/zip -qry meo-beo-ios-release-unsigned.ipa Payload
+          rm -rf Payload
+          /usr/bin/unzip -t meo-beo-ios-release-unsigned.ipa
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: meo-beo-ios-release-unsigned
-          path: build/ios/ipa/*.ipa
+          path: meo-beo-ios-release-unsigned.ipa
           if-no-files-found: error
