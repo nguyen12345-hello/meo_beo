@@ -1,0 +1,47 @@
+name: Build Flutter iOS IPA
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-ios:
+    name: Build iOS App and Export IPA
+    runs-on: macos-latest # Bắt buộc dùng macOS để build iOS
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 1. Cài đặt môi trường Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.x' # Thay đổi phiên bản Flutter của bạn tại đây
+          channel: 'stable'
+          cache: true
+
+      # 2. Tải các package phụ thuộc
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 3. Build ứng dụng iOS ở chế độ release (chưa ký mã hoặc ký thủ công)
+      - name: Build iOS App
+        run: flutter build ios --release --no-codesign
+
+      # 4. Đóng gói thành file .ipa (hoặc cấu hình bước export nếu đã có provisioning profile)
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cd Payload
+          ln -s ../build/ios/iphoneos/Runner.app Runner.app
+          cd ..
+          zip -r flutter-app.ipa Payload
+          rm -rf Payload
+
+      # 5. Lưu file .ipa thành Artifact để tải về
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-release-ipa
+          path: flutter-app.ipa
