@@ -1,0 +1,72 @@
+name: Build Flutter iOS IPA
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Validate and Build iOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Use the current stable Flutter SDK. The iOS project uses Flutter's
+      # generated Swift package integration, which is not supported by older
+      # pinned Flutter releases such as 3.24.0.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show toolchain versions
+        run: |
+          flutter --version
+          xcodebuild -version
+          pod --version
+
+      - name: Validate iOS project files
+        run: |
+          plutil -lint ios/Runner.xcodeproj/project.pbxproj
+          plutil -lint ios/Runner/Info.plist
+          if grep -nE '^(<<<<<<<|=======|>>>>>>>)' ios/Runner.xcodeproj/project.pbxproj ios/Runner/Info.plist; then
+            echo "Unresolved Git conflict markers found in iOS project files."
+            exit 1
+          fi
+
+      - name: Install Flutter dependencies
+        run: |
+          flutter clean
+          flutter pub get
+
+      - name: Resolve CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: Inspect Xcode project
+        run: xcodebuild -list -project ios/Runner.xcodeproj
+
+      - name: Build iOS App (unsigned)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned IPA
+        run: |
+          test -d build/ios/iphoneos/Runner.app
+          rm -rf Payload flutter-app.ipa
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          /usr/bin/zip -qry flutter-app.ipa Payload
+          rm -rf Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meo-beo-ios-release-unsigned
+          path: flutter-app.ipa
+          if-no-files-found: error
