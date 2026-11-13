@@ -30,3 +30,10 @@ Mở `ios/Runner.xcworkspace` bằng Xcode để cấu hình Signing & Capabilit
 - iOS mặc định dùng MQTT TCP `1883` (TLS `8883`).
 - Flutter Web dùng WebSocket, mặc định `9001`.
 - Điền đúng IP máy chủ MQTT cùng mạng Wi-Fi với thiết bị.
+
+## Quyền Mạng nội bộ (iOS)
+iOS 14+ yêu cầu người dùng cấp quyền **Mạng nội bộ** trước khi app kết nối tới máy chủ MQTT (192.168.x.x) và camera ESP32 (192.168.4.2).
+- `Info.plist` đã khai báo `NSLocalNetworkUsageDescription` và `NSBonjourServices`.
+- `ios/Runner/AppDelegate.swift` kích hoạt hộp thoại xin quyền qua MethodChannel `meo_beo/local_network`.
+- `lib/local_network_permission.dart` xin quyền khi mở app, trước khi kết nối MQTT và trước khi mở camera; nếu bị từ chối sẽ hiện hộp thoại có nút **Mở Cài đặt**.
+- Nếu trước đó đã bấm "Không cho phép": Cài đặt > Meo Beo > bật **Mạng nội bộ**. Nếu hộp thoại không hiện, gỡ app rồi cài lại.

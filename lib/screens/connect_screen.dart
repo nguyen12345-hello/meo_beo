@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../local_network_permission.dart';
 import '../mqtt_service.dart';
 import 'home_shell.dart';
 
@@ -22,11 +23,16 @@ class _ConnectScreenState extends State<ConnectScreen> {
   final _pass = TextEditingController();
   bool _hidePass = true;
   bool _tls = false;
+  bool _checkingPermission = false;
 
   @override
   void initState() {
     super.initState();
     _loadSaved();
+    // Hỏi quyền Mạng nội bộ ngay khi mở app để người dùng cấp quyền trước khi kết nối.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LocalNetworkPermission.ensure();
+    });
   }
 
   Future<void> _loadSaved() async {
@@ -53,6 +59,15 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
   Future<void> _connect() async {
     await _save();
+    if (!mounted) return;
+    setState(() => _checkingPermission = true);
+    var allowed = await LocalNetworkPermission.ensure();
+    if (!mounted) return;
+    setState(() => _checkingPermission = false);
+    if (!allowed) {
+      allowed = await LocalNetworkPermission.showDeniedDialog(context);
+      if (!allowed || !mounted) return;
+    }
     final mqtt = context.read<MqttService>();
     final ok = await mqtt.connect(
       host: _host.text.trim(),
@@ -86,7 +101,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final connecting = context.watch<MqttService>().connecting;
+    final connecting =
+        context.watch<MqttService>().connecting || _checkingPermission;
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6FA),
       body: Container(
