@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -24,16 +25,16 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
 	<key>NSCameraUsageDescription</key>
 	<string>CatAI cần camera để quan sát và hỗ trợ nhận diện mèo.</string>
+
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Ứng dụng không ghi âm; quyền này chỉ phục vụ khả năng tương thích camera.</string>
+
 	<key>NSLocalNetworkUsageDescription</key>
-<<<<<<< HEAD
-	<string>Meo Beo cần truy cập mạng nội bộ (Wi-Fi) để kết nối máy chủ MQTT và camera ESP32 của thiết bị chăm sóc mèo.</string>
-=======
-	<string>Meo Beo cần truy cập mạng nội bộ (Wi-Fi) trong mục Mạng cục bộ để kết nối máy chủ MQTT và camera ESP32 của thiết bị chăm sóc mèo.</string>
->>>>>>> 88e53c1 (final1)
+	<string>Meo Beo cần truy cập Mạng cục bộ (Wi-Fi) để kết nối máy chủ MQTT và camera ESP32 của thiết bị chăm sóc mèo.</string>
+
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_bonjour._tcp</string>
@@ -41,6 +42,7 @@
 		<string>_mqtt._tcp</string>
 		<string>_http._tcp</string>
 	</array>
+
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -48,8 +50,10 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -71,18 +75,21 @@
 			</array>
 		</dict>
 	</dict>
+
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
