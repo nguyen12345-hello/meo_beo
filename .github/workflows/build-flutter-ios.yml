@@ -1,47 +1,137 @@
+
 name: Build Flutter iOS IPA
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build-ios:
-    name: Build iOS App and Export IPA
-    runs-on: macos-latest # Bắt buộc dùng macOS để build iOS
+    name: Build iOS App and Export Unsigned IPA
+    runs-on: macos-latest
+    timeout-minutes: 45
 
     steps:
+      # 1. Checkout source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Cài đặt môi trường Flutter
+      # 2. Setup Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0' # Thay đổi phiên bản Flutter của bạn tại đây
-          channel: 'stable'
+          flutter-version: "3.24.0"
+          channel: stable
           cache: true
 
-      # 2. Tải các package phụ thuộc
+      # 3. Show versions
+      - name: Check Flutter and Dart
+        run: |
+          flutter --version
+          dart --version
+
+      # 4. Install dependencies
       - name: Install Dependencies
         run: flutter pub get
 
-      # 3. Build ứng dụng iOS ở chế độ release (chưa ký mã hoặc ký thủ công)
-      - name: Build iOS App
-        run: flutter build ios --release --no-codesign
-
-      # 4. Đóng gói thành file .ipa (hoặc cấu hình bước export nếu đã có provisioning profile)
-      - name: Package IPA
+      # 5. Disable Xcode code signing settings
+      - name: Disable iOS Code Signing
+        shell: bash
         run: |
-          mkdir -p Payload
-          cd Payload
-          ln -s ../build/ios/iphoneos/Runner.app Runner.app
-          cd ..
-          zip -r flutter-app.ipa Payload
-          rm -rf Payload
+          python3 <<'PY'
+          from pathlib import Path
+          import re
 
-      # 5. Lưu file .ipa thành Artifact để tải về
+          path = Path("ios/Runner.xcodeproj/project.pbxproj")
+
+          if not path.exists():
+              raise SystemExit("Runner.xcodeproj not found")
+
+          content = path.read_text()
+
+          settings = {
+              "CODE_SIGNING_ALLOWED": "NO",
+              "CODE_SIGNING_REQUIRED": "NO",
+              "CODE_SIGN_IDENTITY": '""',
+              "DEVELOPMENT_TEAM": '""',
+              "PROVISIONING_PROFILE_SPECIFIER": '""',
+          }
+
+          pattern = re.compile(
+              r"(buildSettings = \{\n)(.*?)(\n\s*\};)",
+              re.DOTALL
+          )
+
+          def update_settings(match):
+              body = match.group(2)
+
+              for key in settings:
+                  body = re.sub(
+                      rf"^[ \t]*{key}[ \t]*=.*?;[ \t]*$",
+                      "",
+                      body,
+                      flags=re.MULTILINE
+                  )
+
+              overrides = "\n" + "\n".join(
+                  f"                {key} = {value};"
+                  for key, value in settings.items()
+              )
+
+              return match.group(1) + body + overrides + match.group(3)
+
+          content, count = pattern.subn(update_settings, content)
+
+          if count == 0:
+              raise SystemExit("Could not find Xcode build settings")
+
+          path.write_text(content)
+          print(f"Disabled code signing in {count} Xcode configurations")
+          PY
+
+      # 6. Build iOS without signing
+      - name: Build iOS App
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build ios --release --no-codesign -v
+
+      # 7. Package unsigned IPA
+      - name: Package Unsigned IPA
+        shell: bash
+        run: |
+          set -e
+
+          APP_PATH="build/ios/iphoneos/Runner.app"
+          OUTPUT_DIR="dist"
+          STAGE="build/ios/unsigned_package"
+
+          if [ ! -d "$APP_PATH" ]; then
+            echo "ERROR: Runner.app not found"
+            exit 1
+          fi
+
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE/Payload" "$OUTPUT_DIR"
+
+          cp -R "$APP_PATH" "$STAGE/Payload/Runner.app"
+
+          cd "$STAGE"
+          zip -qry "$GITHUB_WORKSPACE/$OUTPUT_DIR/meo_beo_unsigned.ipa" Payload
+
+          cd "$GITHUB_WORKSPACE"
+
+          echo "Unsigned IPA created:"
+          ls -lh "$OUTPUT_DIR/meo_beo_unsigned.ipa"
+
+          unzip -t "$OUTPUT_DIR/meo_beo_unsigned.ipa"
+
+      # 8. Upload IPA
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-release-ipa
-          path: flutter-app.ipa
+          name: meo_beo_unsigned_ipa
+          path: dist/meo_beo_unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
