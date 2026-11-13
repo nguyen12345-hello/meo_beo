@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -68,9 +67,7 @@ class _HomeShellState extends State<HomeShell> {
                         child: _MetricCard(
                           icon: Icons.restaurant_rounded,
                           title: 'Máy cho ăn',
-                          value: mqtt.feeding
-                              ? 'Đang hoạt động'
-                              : 'Đang nghỉ',
+                          value: mqtt.feeding ? 'Đang hoạt động' : 'Đang nghỉ',
                           active: mqtt.feeding,
                           tint: _orange,
                           activeLabel: 'ĐANG CHẠY',
@@ -82,9 +79,7 @@ class _HomeShellState extends State<HomeShell> {
                         child: _MetricCard(
                           icon: Icons.water_drop_rounded,
                           title: 'Cấp nước',
-                          value: mqtt.watering
-                              ? 'Đang hoạt động'
-                              : 'Đang nghỉ',
+                          value: mqtt.watering ? 'Đang hoạt động' : 'Đang nghỉ',
                           active: mqtt.watering,
                           tint: _blue,
                           activeLabel: 'ĐANG CHẠY',
@@ -136,29 +131,13 @@ class _HomeShellState extends State<HomeShell> {
                   // SCHEDULE
                   const _SectionTitle(
                     title: 'LỊCH CHĂM SÓC TỰ ĐỘNG',
-                    subtitle: 'Thiết lập thời gian hoạt động hằng ngày',
+                    subtitle: 'Chọn ngày và khung giờ cho ăn hoặc cấp nước',
                     icon: Icons.calendar_month_rounded,
                   ),
 
                   const SizedBox(height: 13),
 
-                  const _ScheduleSection(
-                    title: 'Lịch cấp nước',
-                    subtitle: 'Tự động bổ sung nước cho Boss',
-                    isFeed: false,
-                    color: _blue,
-                    icon: Icons.water_drop_rounded,
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  const _ScheduleSection(
-                    title: 'Lịch cho ăn',
-                    subtitle: 'Tự động cung cấp thức ăn',
-                    isFeed: true,
-                    color: _orange,
-                    icon: Icons.restaurant_rounded,
-                  ),
+                  const _ScheduleSection(),
 
                   const SizedBox(height: 25),
 
@@ -199,10 +178,8 @@ class _HomeShellState extends State<HomeShell> {
             size: 28,
           ),
         ),
-
         const SizedBox(width: 12),
-
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -228,11 +205,8 @@ class _HomeShellState extends State<HomeShell> {
             ],
           ),
         ),
-
         _ConnectionPill(connected: mqtt.connected),
-
         const SizedBox(width: 5),
-
         PopupMenuButton<String>(
           tooltip: 'Tùy chọn',
           icon: const Icon(
@@ -362,9 +336,8 @@ class _ConnectionPill extends StatelessWidget {
           Text(
             connected ? 'ONLINE' : 'OFFLINE',
             style: TextStyle(
-              color: connected
-                  ? const Color(0xFF12866F)
-                  : const Color(0xFFC74444),
+              color:
+                  connected ? const Color(0xFF12866F) : const Color(0xFFC74444),
               fontSize: 9,
               fontWeight: FontWeight.w900,
               letterSpacing: .4,
@@ -717,9 +690,7 @@ class _ActionPanel extends StatelessWidget {
               size: 25,
             ),
           ),
-
           const SizedBox(width: 13),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -759,18 +730,14 @@ class _ActionPanel extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(width: 8),
-
           SizedBox(
             width: 91,
             height: 39,
             child: FilledButton(
               onPressed: () => onChanged(!active),
               style: FilledButton.styleFrom(
-                backgroundColor: active
-                    ? const Color(0xFFF0F2F6)
-                    : color,
+                backgroundColor: active ? const Color(0xFFF0F2F6) : color,
                 foregroundColor: active ? _muted : Colors.white,
                 elevation: 0,
                 padding: EdgeInsets.zero,
@@ -807,24 +774,19 @@ class _ActionPanel extends StatelessWidget {
 
 // AUTOMATIC SCHEDULE
 class _ScheduleSection extends StatelessWidget {
-  const _ScheduleSection({
-    required this.title,
-    required this.subtitle,
-    required this.isFeed,
-    required this.color,
-    required this.icon,
-  });
-
-  final String title;
-  final String subtitle;
-  final bool isFeed;
-  final Color color;
-  final IconData icon;
+  const _ScheduleSection();
 
   @override
   Widget build(BuildContext context) {
     final store = context.watch<ScheduleStore>();
-    final list = store.byType(isFeed);
+    final list = [...store.items]..sort((a, b) {
+        final aDate = a.date ?? DateTime(1900);
+        final bDate = b.date ?? DateTime(1900);
+        final byDate = aDate.compareTo(bDate);
+        return byDate != 0
+            ? byDate
+            : (a.hour * 60 + a.minute).compareTo(b.hour * 60 + b.minute);
+      });
 
     return Container(
       padding: const EdgeInsets.fromLTRB(15, 14, 12, 10),
@@ -848,51 +810,109 @@ class _ScheduleSection extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(.12),
+                  color: _mint.withOpacity(.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, color: color, size: 22),
+                child: const Icon(
+                  Icons.calendar_month_rounded,
+                  color: _mint,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 11),
-              Expanded(
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
-                      style: const TextStyle(
+                      'Lịch chăm sóc',
+                      style: TextStyle(
                         color: _ink,
                         fontSize: 13,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: 3),
                     Text(
-                      subtitle,
-                      style: const TextStyle(
-                        color: _muted,
-                        fontSize: 10,
-                      ),
+                      'Chọn ngày để thêm khung giờ',
+                      style: TextStyle(color: _muted, fontSize: 10),
                     ),
                   ],
                 ),
               ),
               IconButton.filledTonal(
-                tooltip: 'Thêm lịch',
+                tooltip: 'Chọn ngày',
                 onPressed: () async {
-                  final t = await showTimePicker(
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2100),
+                  );
+                  if (date == null || !context.mounted) return;
+
+                  final isFeed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => SimpleDialog(
+                      title: const Text('Chọn thiết bị'),
+                      children: [
+                        SimpleDialogOption(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(
+                              Icons.restaurant_rounded,
+                              color: _orange,
+                            ),
+                            title: Text('Cho ăn'),
+                          ),
+                        ),
+                        SimpleDialogOption(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(
+                              Icons.water_drop_rounded,
+                              color: _blue,
+                            ),
+                            title: Text('Cấp nước'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (isFeed == null || !context.mounted) return;
+
+                  final start = await showTimePicker(
                     context: context,
                     initialTime: TimeOfDay.now(),
+                    helpText: 'Chọn giờ bắt đầu',
                   );
+                  if (start == null || !context.mounted) return;
 
-                  if (t != null) {
-                    store.add(isFeed, t.hour, t.minute);
-                  }
+                  final end = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay(
+                      hour: (start.hour + 1) % 24,
+                      minute: start.minute,
+                    ),
+                    helpText: 'Chọn giờ tắt',
+                  );
+                  if (end == null) return;
+
+                  await store.add(
+                    isFeed: isFeed,
+                    date: date,
+                    hour: start.hour,
+                    minute: start.minute,
+                    endHour: end.hour,
+                    endMinute: end.minute,
+                  );
                 },
                 icon: const Icon(Icons.add_rounded),
                 style: IconButton.styleFrom(
-                  backgroundColor: color.withOpacity(.12),
-                  foregroundColor: color,
+                  backgroundColor: _mint.withOpacity(.12),
+                  foregroundColor: _mint,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),
                   ),
@@ -900,10 +920,8 @@ class _ScheduleSection extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 8),
           const Divider(color: _line, height: 1),
-
           if (list.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 18),
@@ -934,7 +952,6 @@ class _ScheduleSection extends StatelessWidget {
                 ],
               ),
             ),
-
           for (final it in list)
             Dismissible(
               key: ValueKey(it.id),
@@ -961,12 +978,14 @@ class _ScheduleSection extends StatelessWidget {
                       width: 37,
                       height: 37,
                       decoration: BoxDecoration(
-                        color: color.withOpacity(.10),
+                        color: (it.isFeed ? _orange : _blue).withOpacity(.10),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        Icons.alarm_rounded,
-                        color: color,
+                        it.isFeed
+                            ? Icons.restaurant_rounded
+                            : Icons.water_drop_rounded,
+                        color: it.isFeed ? _orange : _blue,
                         size: 20,
                       ),
                     ),
@@ -976,19 +995,24 @@ class _ScheduleSection extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            it.timeText,
+                            it.date == null
+                                ? '${it.isFeed ? 'Cho ăn' : 'Cấp nước'} · Hằng ngày'
+                                : '${it.isFeed ? 'Cho ăn' : 'Cấp nước'} · ${it.date!.day.toString().padLeft(2, '0')}/${it.date!.month.toString().padLeft(2, '0')}/${it.date!.year}',
                             style: const TextStyle(
                               color: _ink,
-                              fontSize: 19,
-                              fontWeight: FontWeight.w900,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Hằng ngày · ${it.seconds} giây',
+                            it.endHour == null || it.endMinute == null
+                                ? '${it.timeText} · ${it.seconds} giây'
+                                : '${it.timeText} – ${it.endHour!.toString().padLeft(2, '0')}:${it.endMinute!.toString().padLeft(2, '0')}',
                             style: const TextStyle(
                               color: _muted,
-                              fontSize: 10,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -997,7 +1021,40 @@ class _ScheduleSection extends StatelessWidget {
                     Switch.adaptive(
                       value: it.enabled,
                       onChanged: (v) => store.toggle(it, v),
-                      activeColor: color,
+                      activeThumbColor: it.isFeed ? _orange : _blue,
+                    ),
+                    IconButton(
+                      tooltip: 'Xóa lịch',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Xóa lịch này?'),
+                            content: const Text(
+                              'Lịch chăm sóc đã chọn sẽ bị xóa.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Hủy'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Xóa'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          await store.remove(it);
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Colors.redAccent,
+                        size: 21,
+                      ),
                     ),
                   ],
                 ),

@@ -12,14 +12,20 @@ class ScheduleItem {
     required this.isFeed,
     required this.hour,
     required this.minute,
+    this.date,
+    this.endHour,
+    this.endMinute,
     this.seconds = 5,
     this.enabled = true,
   });
 
   final String id;
   final bool isFeed; // true: cho ăn (set1), false: cho nước (set2)
+  final DateTime? date;
   final int hour;
   final int minute;
+  final int? endHour;
+  final int? endMinute;
   final int seconds;
   bool enabled;
 
@@ -29,8 +35,11 @@ class ScheduleItem {
   Map<String, dynamic> toJson() => {
         'id': id,
         'isFeed': isFeed,
+        'date': date?.toIso8601String(),
         'hour': hour,
         'minute': minute,
+        'endHour': endHour,
+        'endMinute': endMinute,
         'seconds': seconds,
         'enabled': enabled,
       };
@@ -38,10 +47,13 @@ class ScheduleItem {
   factory ScheduleItem.fromJson(Map<String, dynamic> j) => ScheduleItem(
         id: j['id'] as String,
         isFeed: j['isFeed'] as bool,
+        date: j['date'] == null ? null : DateTime.parse(j['date'] as String),
         hour: j['hour'] as int,
         minute: j['minute'] as int,
-        seconds: j['seconds'] as int,
-        enabled: j['enabled'] as bool,
+        endHour: j['endHour'] as int?,
+        endMinute: j['endMinute'] as int?,
+        seconds: j['seconds'] as int? ?? 5,
+        enabled: j['enabled'] as bool? ?? true,
       );
 }
 
@@ -58,6 +70,7 @@ class ScheduleStore extends ChangeNotifier {
   List<ScheduleItem> items = [];
   Timer? _timer;
   final Map<String, String> _lastFired = {};
+  final Set<String> _activeSchedules = {};
 
   List<ScheduleItem> byType(bool isFeed) {
     final list = items.where((e) => e.isFeed == isFeed).toList();
@@ -65,13 +78,22 @@ class ScheduleStore extends ChangeNotifier {
     return list;
   }
 
-  Future<void> add(bool isFeed, int hour, int minute, {int seconds = 5}) async {
+  Future<void> add({
+    required bool isFeed,
+    required DateTime date,
+    required int hour,
+    required int minute,
+    required int endHour,
+    required int endMinute,
+  }) async {
     items.add(ScheduleItem(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       isFeed: isFeed,
+      date: DateTime(date.year, date.month, date.day),
       hour: hour,
       minute: minute,
-      seconds: seconds,
+      endHour: endHour,
+      endMinute: endMinute,
     ));
     await _save();
     notifyListeners();
@@ -79,12 +101,18 @@ class ScheduleStore extends ChangeNotifier {
 
   Future<void> toggle(ScheduleItem item, bool value) async {
     item.enabled = value;
+    if (!value && _activeSchedules.remove(item.id)) {
+      item.isFeed ? mqtt.setFeed(false) : mqtt.setWater(false);
+    }
     await _save();
     notifyListeners();
   }
 
   Future<void> remove(ScheduleItem item) async {
     items.removeWhere((e) => e.id == item.id);
+    if (_activeSchedules.remove(item.id)) {
+      item.isFeed ? mqtt.setFeed(false) : mqtt.setWater(false);
+    }
     await _save();
     notifyListeners();
   }
@@ -94,10 +122,45 @@ class ScheduleStore extends ChangeNotifier {
     final now = DateTime.now();
     final key = '${now.year}-${now.month}-${now.day} ${now.hour}:${now.minute}';
     for (final it in items) {
-      if (!it.enabled) continue;
-      if (it.hour == now.hour && it.minute == now.minute && _lastFired[it.id] != key) {
-        _lastFired[it.id] = key;
-        mqtt.runFor(isFeed: it.isFeed, seconds: it.seconds);
+      if (!it.enabled) {
+        if (_activeSchedules.remove(it.id)) {
+          it.isFeed ? mqtt.setFeed(false) : mqtt.setWater(false);
+        }
+        continue;
+      }
+      if (it.date == null || it.endHour == null || it.endMinute == null) {
+        if (it.hour == now.hour &&
+            it.minute == now.minute &&
+            _lastFired[it.id] != key) {
+          _lastFired[it.id] = key;
+          mqtt.runFor(isFeed: it.isFeed, seconds: it.seconds);
+        }
+        continue;
+      }
+
+      final start = DateTime(
+        it.date!.year,
+        it.date!.month,
+        it.date!.day,
+        it.hour,
+        it.minute,
+      );
+      var end = DateTime(
+        it.date!.year,
+        it.date!.month,
+        it.date!.day,
+        it.endHour!,
+        it.endMinute!,
+      );
+      if (!end.isAfter(start)) {
+        end = end.add(const Duration(days: 1));
+      }
+
+      final isActive = !now.isBefore(start) && now.isBefore(end);
+      if (isActive && _activeSchedules.add(it.id)) {
+        it.isFeed ? mqtt.setFeed(true) : mqtt.setWater(true);
+      } else if (!isActive && _activeSchedules.remove(it.id)) {
+        it.isFeed ? mqtt.setFeed(false) : mqtt.setWater(false);
       }
     }
   }
