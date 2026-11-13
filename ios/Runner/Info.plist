@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -24,12 +28,33 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+<<<<<<< HEAD
 	<key>NSCameraUsageDescription</key>
 	<string>CatAI cần camera để quan sát và hỗ trợ nhận diện mèo.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Ứng dụng không ghi âm; quyền này chỉ phục vụ khả năng tương thích camera.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Mèo Béo cần quyền truy cập mạng nội bộ để kết nối bộ điều khiển MQTT, Node-RED và camera trong cùng mạng Wi-Fi. Dữ liệu chỉ được trao đổi với thiết bị/máy chủ bạn cấu hình.</string>
+=======
+
+	<key>NSCameraUsageDescription</key>
+	<string>CatAI cần camera để quan sát và hỗ trợ nhận diện mèo.</string>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Ứng dụng không ghi âm; quyền này chỉ phục vụ khả năng tương thích camera.</string>
+
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Meo Beo cần truy cập Mạng cục bộ (Wi-Fi) để kết nối máy chủ MQTT và camera ESP32 của thiết bị chăm sóc mèo.</string>
+
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_bonjour._tcp</string>
+		<string>_lnp._tcp</string>
+		<string>_mqtt._tcp</string>
+		<string>_http._tcp</string>
+	</array>
+
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -37,8 +62,15 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+<<<<<<< HEAD
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+=======
+
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -60,18 +92,30 @@
 			</array>
 		</dict>
 	</dict>
+<<<<<<< HEAD
+=======
+
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+<<<<<<< HEAD
+=======
+
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+<<<<<<< HEAD
+=======
+
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -2,6 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+<<<<<<< HEAD
+=======
+import '../local_network_permission.dart';
+
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
 
@@ -44,6 +49,33 @@ class _CameraPageState extends State<CameraPage> {
       _web = null;
     });
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    // iOS cần quyền "Mạng nội bộ" để mở được http://192.168.4.2/stream.
+=======
+    // iOS cần quyền "Mạng cục bộ" để mở được http://192.168.4.2/stream.
+>>>>>>> 88e53c1 (final1)
+    var allowed = await LocalNetworkPermission.ensure();
+    if (!mounted) return;
+    if (!allowed) {
+      setState(() => _busy = false);
+      allowed = await LocalNetworkPermission.showDeniedDialog(context);
+      if (!mounted) return;
+      if (!allowed) {
+        setState(() {
+<<<<<<< HEAD
+          _error = 'Chưa có quyền Mạng nội bộ. Vào Cài đặt > Meo Beo để bật quyền này.';
+=======
+          _error = 'Chưa có quyền Mạng cục bộ. Vào Cài đặt > Meo Beo để bật quyền này.';
+>>>>>>> 88e53c1 (final1)
+        });
+        return;
+      }
+      setState(() => _busy = true);
+    }
+
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
     final html = '''
 <!doctype html>
 <html>

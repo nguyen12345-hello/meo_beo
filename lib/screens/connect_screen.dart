@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+<<<<<<< HEAD
+=======
+import '../local_network_permission.dart';
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 import '../mqtt_service.dart';
 import 'home_shell.dart';
 
@@ -22,11 +26,22 @@ class _ConnectScreenState extends State<ConnectScreen> {
   final _pass = TextEditingController();
   bool _hidePass = true;
   bool _tls = false;
+<<<<<<< HEAD
+=======
+  bool _checkingPermission = false;
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
 
   @override
   void initState() {
     super.initState();
     _loadSaved();
+<<<<<<< HEAD
+=======
+    // Hỏi quyền Mạng nội bộ ngay khi mở app để người dùng cấp quyền trước khi kết nối.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LocalNetworkPermission.ensure();
+    });
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
   }
 
   Future<void> _loadSaved() async {
@@ -53,6 +68,18 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
   Future<void> _connect() async {
     await _save();
+<<<<<<< HEAD
+=======
+    if (!mounted) return;
+    setState(() => _checkingPermission = true);
+    var allowed = await LocalNetworkPermission.ensure();
+    if (!mounted) return;
+    setState(() => _checkingPermission = false);
+    if (!allowed) {
+      allowed = await LocalNetworkPermission.showDeniedDialog(context);
+      if (!allowed || !mounted) return;
+    }
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
     final mqtt = context.read<MqttService>();
     final ok = await mqtt.connect(
       host: _host.text.trim(),
@@ -86,7 +113,12 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     final connecting = context.watch<MqttService>().connecting;
+=======
+    final connecting =
+        context.watch<MqttService>().connecting || _checkingPermission;
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6FA),
       body: Container(
@@ -136,6 +168,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
                     title: const Text('Mã hóa kết nối TLS', style: TextStyle(color: Color(0xFF536176), fontSize: 12, fontWeight: FontWeight.w600)),
                     value: _tls, activeColor: const Color(0xFF18B99A),
                     onChanged: (v) => setState(() { _tls = v; if (!kIsWeb) { if (v && _port.text == '1883') _port.text = '8883'; if (!v && _port.text == '8883') _port.text = '1883'; } })),
+<<<<<<< HEAD
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(14),
@@ -196,6 +229,13 @@ class _ConnectScreenState extends State<ConnectScreen> {
                     onPressed: connecting ? null : _connect,
                     icon: connecting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.wifi_find_rounded),
                     label: Text(connecting ? 'ĐANG YÊU CẦU KẾT NỐI...' : 'YÊU CẦU QUYỀN & KẾT NỐI'),
+=======
+                  const SizedBox(height: 10),
+                  SizedBox(height: 54, child: FilledButton.icon(
+                    onPressed: connecting ? null : _connect,
+                    icon: connecting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.login_rounded),
+                    label: Text(connecting ? 'ĐANG KẾT NỐI...' : 'ĐĂNG NHẬP & KẾT NỐI'),
+>>>>>>> d769f7474b21e8fe80c9e4bd19aa7f988fac606e
                     style: FilledButton.styleFrom(backgroundColor: const Color(0xFF18B99A), foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                       textStyle: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: .5))),
