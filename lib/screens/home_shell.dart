@@ -16,7 +16,9 @@ const _blue = Color(0xFF559CEB);
 const _line = Color(0xFFE9EEF5);
 
 class HomeShell extends StatefulWidget {
-  const HomeShell({super.key});
+  const HomeShell({super.key, required this.cameraHost});
+
+  final String cameraHost;
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -48,7 +50,7 @@ class _HomeShellState extends State<HomeShell> {
                   ],
 
                   // CAMERA
-                  const CameraPage(),
+                  CameraPage(host: widget.cameraHost),
 
                   const SizedBox(height: 25),
 

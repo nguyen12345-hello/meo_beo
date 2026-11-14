@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class CameraPage extends StatefulWidget {
-  const CameraPage({super.key});
+  const CameraPage({super.key, required this.host});
+
+  final String host;
 
   @override
   State<CameraPage> createState() => _CameraPageState();
 }
 
 class _CameraPageState extends State<CameraPage> {
-  static const String _cameraUrl = 'http://192.168.4.2/stream';
+  String get _cameraUrl => 'http://${widget.host}/stream';
 
   static const Color _mint = Color(0xFF16B89A);
   static const Color _ink = Color(0xFF17233B);
@@ -298,10 +300,10 @@ img {
                             size: 13,
                           ),
                           const SizedBox(width: 5),
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              '192.168.4.2/stream',
-                              style: TextStyle(
+                              '${widget.host}/stream',
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,

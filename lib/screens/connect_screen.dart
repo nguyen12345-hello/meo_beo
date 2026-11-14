@@ -64,7 +64,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
     if (!mounted) return;
     if (ok) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeShell()),
+        MaterialPageRoute(
+          builder: (_) => HomeShell(cameraHost: _host.text.trim()),
+        ),
       );
     } else {
       ScaffoldMessenger.of(context)
